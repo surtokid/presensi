@@ -72,6 +72,21 @@
       font-family: inherit;
     }
   </style>
+
+  <!-- OneSignal Web Push SDK -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "03a41ed9-e775-424c-977e-17351ec5e4f7",
+      safari_web_id: "web.onesignal.auto.5460a967-902f-480f-be25-7a4d963d753c",
+      serviceWorkerParam: { scope: "/presensi/" },
+      serviceWorkerPath: "sw.js"
+    });
+  });
+</script>
+  
 </head>
 <body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex flex-col">
 
@@ -1457,6 +1472,28 @@
     let izinPhotoBase64 = null;
     let lemburPhotoBase64 = null;
 
+    // Fungsi Pengirim Push Notification via Google Apps Script (Aman dari GitHub Scanning)
+async function kirimPushNotification(judul, pesan) {
+  try {
+    const payload = {
+      action: 'sendNotification',
+      judul: judul,
+      pesan: pesan
+    };
+
+    // Mengirim ke endpoint GAS yang sama dengan upload foto
+    await fetch(GAS_ENDPOINT_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8'
+      },
+      body: JSON.stringify(payload)
+    });
+  } catch (err) {
+    console.warn('Push notification via GAS terlewati:', err);
+  }
+}
+    
     function showToast(message, type = 'info') {
       const c = document.getElementById('toastContainer');
       if (!c) return;
@@ -2735,6 +2772,12 @@
         }]);
 
         if (error) throw error;
+        
+        // Kirim push notification presensi
+kirimPushNotification(
+  `Presensi: ${currentUser.nama_lengkap}`,
+  `${currentUser.nama_lengkap} telah presensi ${currentPresensiMode.toUpperCase()} (${statusPresensi})`
+);
 
         showToast(`Presensi ${currentPresensiMode} (${statusPresensi}) berhasil disimpan!`, 'success');
         closeModalPresensi();
@@ -4078,6 +4121,14 @@
       document.getElementById('pengumumanJudul').value = '';
       document.getElementById('pengumumanIsi').value = '';
       loadAdminPengumuman();
+
+      await supabaseClient.from('pengumuman_presensi').insert([{ judul, isi, author: currentAdmin?.nama_lengkap || 'Admin' }]);
+
+// Kirim push notification ke semua perangkat
+kirimPushNotification(`Pengumuman: ${judul}`, isi);
+
+showToast('Pengumuman berhasil disiarkan ke seluruh karyawan!', 'success');
+      
     }
 
     async function loadAdminUserList() {
