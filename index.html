@@ -214,21 +214,21 @@
 
         <!-- Tombol Aksi Sekunder: Sakit, Libur, Cuti, Lembur -->
         <div class="grid grid-cols-4 gap-2">
-          <button onclick="openModalPresensiDirect('SAKIT')" class="p-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center gap-1.5 text-slate-700 active:scale-95 transition-all shadow-sm">
+          <button onclick="openModalIzinUpload('SAKIT')" class="p-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center gap-1.5 text-slate-700 active:scale-95 transition-all shadow-sm">
             <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-sm">
               <i class="fa-solid fa-briefcase-medical"></i>
             </div>
             <span class="text-[11px] font-bold">Sakit</span>
           </button>
 
-          <button onclick="openModalPresensiDirect('LIBUR')" class="p-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center gap-1.5 text-slate-700 active:scale-95 transition-all shadow-sm">
-            <div class="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center text-sm">
-              <i class="fa-solid fa-umbrella-beach"></i>
+          <button id="btnMenuLiburKaryawan" onclick="handleMenuLiburClick()" class="p-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center gap-1.5 text-slate-700 active:scale-95 transition-all shadow-sm">
+            <div id="btnMenuLiburIconContainer" class="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center text-sm">
+              <i id="btnMenuLiburIcon" class="fa-solid fa-umbrella-beach"></i>
             </div>
-            <span class="text-[11px] font-bold">Libur</span>
+            <span id="btnMenuLiburText" class="text-[11px] font-bold">Libur</span>
           </button>
 
-          <button id="btnMenuCutiKaryawan" onclick="openModalPresensiDirect('CUTI')" class="p-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center gap-1.5 text-slate-700 active:scale-95 transition-all shadow-sm">
+          <button id="btnMenuCutiKaryawan" onclick="handleMenuCutiClick()" class="p-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center gap-1.5 text-slate-700 active:scale-95 transition-all shadow-sm">
             <div class="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-sm">
               <i class="fa-solid fa-calendar-check"></i>
             </div>
@@ -818,29 +818,68 @@
     </div>
   </div>
 
-  <!-- MODAL 2: FORM PENGAJUAN LEMBUR -->
+  <!-- MODAL 2: FORM PENGAJUAN LEMBUR (KOTAK UPLOAD & PREVIEW FOTO, DURASI BLANK, KETERANGAN) -->
   <div id="modalLembur" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4">
     <div class="bg-white max-w-sm w-full rounded-3xl p-5 shadow-2xl border border-slate-100 space-y-4">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-        <h3 class="font-extrabold text-sm text-slate-900">Pengajuan Lembur</h3>
-        <button onclick="closeModalLembur()" class="text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <form onsubmit="submitLemburAction(event)" class="space-y-3">
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Durasi Lembur (Jam)</label>
-          <input type="number" id="lemburDurasi" min="1" max="12" value="2" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center text-sm">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+          </div>
+          <div>
+            <h3 class="font-extrabold text-sm text-slate-900">Pengajuan Lembur</h3>
+            <p class="text-[10px] text-slate-400 font-medium">Unggah bukti foto, durasi & keterangan</p>
+          </div>
         </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Keterangan Pekerjaan</label>
-          <textarea id="lemburKeterangan" required rows="2" placeholder="Uraikan pekerjaan lembur..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"></textarea>
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Foto Bukti (Opsional)</label>
-          <input type="file" id="lemburFotoInput" accept="image/*" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700">
-        </div>
-        <button type="submit" id="btnSubmitLembur" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow-md">
-          Kirim Pengajuan Lembur
+        <button type="button" onclick="closeModalLembur()" class="text-slate-400 hover:text-slate-700 text-sm p-1">
+          <i class="fa-solid fa-xmark"></i>
         </button>
+      </div>
+
+      <form onsubmit="submitLemburAction(event)" class="space-y-3.5">
+        <!-- 1. Kotak Upload & Pratinjau Foto Lembur -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Foto Bukti Lembur (Opsional)</label>
+          <input type="file" id="lemburFotoInput" accept="image/*" onchange="handleLemburFotoChange(event)" class="hidden">
+
+          <!-- Kotak Pemicu Unggah Foto -->
+          <div id="lemburUploadBox" onclick="document.getElementById('lemburFotoInput').click()" class="border-2 border-dashed border-slate-300 hover:border-orange-500 rounded-2xl p-5 flex flex-col items-center justify-center cursor-pointer transition-all bg-slate-50 hover:bg-orange-50/20 text-center">
+            <div class="w-12 h-12 rounded-2xl bg-white shadow-sm border border-slate-200 flex items-center justify-center text-orange-600 mb-2">
+              <i class="fa-solid fa-camera text-xl"></i>
+            </div>
+            <span class="text-xs font-bold text-slate-700">Pilih Foto</span>
+            <span class="text-[10px] text-slate-400 mt-0.5">Bukti pekerjaan lembur (JPG, PNG)</span>
+          </div>
+
+          <!-- Pratinjau Gambar (Live Preview Box) -->
+          <div id="lemburPreviewContainer" class="hidden relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 aspect-video flex items-center justify-center">
+            <img id="lemburPreviewImg" src="" alt="Pratinjau Foto Lembur" class="max-h-full max-w-full object-contain">
+            <button type="button" onclick="resetLemburFotoPreview(event)" class="absolute top-2 right-2 px-3 py-1 rounded-xl bg-black/70 hover:bg-rose-600 text-white text-[11px] font-bold border border-white/20 transition-all flex items-center gap-1">
+              <i class="fa-solid fa-rotate-left"></i>
+              <span>Ganti Foto</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. Durasi Lembur (Default Blank / Kosong) -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Durasi Lembur (Jam) <span class="text-rose-500">*</span></label>
+          <input type="number" id="lemburDurasi" min="1" max="12" placeholder="Contoh: 2" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all">
+        </div>
+
+        <!-- 3. Keterangan Pekerjaan Lembur -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Keterangan Pekerjaan <span class="text-rose-500">*</span></label>
+          <textarea id="lemburKeterangan" required rows="3" placeholder="Uraikan pekerjaan lembur yang dilakukan..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all"></textarea>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+          <button type="button" onclick="closeModalLembur()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-all">Batal</button>
+          <button type="submit" id="btnSubmitLembur" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-orange-600 hover:bg-orange-700 text-white shadow-md shadow-orange-500/25 transition-all flex items-center gap-1.5">
+            <span>Kirim Pengajuan</span>
+            <i class="fa-solid fa-paper-plane text-[11px]"></i>
+          </button>
+        </div>
       </form>
     </div>
   </div>
@@ -1259,6 +1298,126 @@
     </div>
   </div>
 
+  <!-- MODAL 12: MODAL PENGAJUAN SAKIT & CUTI (DENGAN PREVIEW GAMBAR & KETERANGAN) -->
+  <div id="modalIzinUpload" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white max-w-sm w-full rounded-3xl p-5 shadow-2xl border border-slate-100 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2">
+          <div id="modalIzinIconBadge" class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-sm">
+            <i class="fa-solid fa-briefcase-medical"></i>
+          </div>
+          <div>
+            <h3 id="modalIzinTitle" class="font-extrabold text-sm text-slate-900">Pengajuan Sakit</h3>
+            <p id="modalIzinSubtitle" class="text-[10px] text-slate-400 font-medium">Unggah foto bukti / surat keterangan</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeModalIzinUpload()" class="text-slate-400 hover:text-slate-700 text-sm p-1">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form onsubmit="submitIzinUploadAction(event)" class="space-y-3.5">
+        <!-- Area Unggah & Pratinjau Gambar -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Unggah Foto Bukti / Surat</label>
+          <input type="file" id="izinFotoInput" accept="image/*" onchange="handleIzinFotoChange(event)" class="hidden">
+
+          <!-- Kotak Pemicu Unggah Foto -->
+          <div id="izinUploadBox" onclick="document.getElementById('izinFotoInput').click()" class="border-2 border-dashed border-slate-300 hover:border-brand-500 rounded-2xl p-5 flex flex-col items-center justify-center cursor-pointer transition-all bg-slate-50 hover:bg-brand-50/20 text-center">
+            <div class="w-12 h-12 rounded-2xl bg-white shadow-sm border border-slate-200 flex items-center justify-center text-brand-600 mb-2">
+              <i class="fa-solid fa-camera text-xl"></i>
+            </div>
+            <span class="text-xs font-bold text-slate-700">Pilih Foto</span>
+            <span class="text-[10px] text-slate-400 mt-0.5">Surat dokter / bukti izin (JPG, PNG)</span>
+          </div>
+
+          <!-- Pratinjau Gambar (Preview Box) -->
+          <div id="izinPreviewContainer" class="hidden relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 aspect-video flex items-center justify-center">
+            <img id="izinPreviewImg" src="" alt="Pratinjau Foto" class="max-h-full max-w-full object-contain">
+            <button type="button" onclick="resetIzinFotoPreview(event)" class="absolute top-2 right-2 px-3 py-1 rounded-xl bg-black/70 hover:bg-rose-600 text-white text-[11px] font-bold border border-white/20 transition-all flex items-center gap-1">
+              <i class="fa-solid fa-rotate-left"></i>
+              <span>Ganti Foto</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Kolom Keterangan / Alasan -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Keterangan / Alasan <span class="text-rose-500">*</span></label>
+          <textarea id="izinKeteranganInput" required rows="3" placeholder="Tuliskan keterangan lengkap di sini..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all"></textarea>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+          <button type="button" onclick="closeModalIzinUpload()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-all">Batal</button>
+          <button type="submit" id="btnSubmitIzinUpload" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-500/25 transition-all flex items-center gap-1.5">
+            <span>Kirim Pengajuan</span>
+            <i class="fa-solid fa-paper-plane text-[11px]"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 13: FORM KONFIRMASI LIBUR (TANPA LOKASI) -->
+  <div id="modalLiburDirect" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white max-w-sm w-full rounded-3xl p-5 shadow-2xl border border-slate-100 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center text-sm">
+            <i class="fa-solid fa-umbrella-beach"></i>
+          </div>
+          <div>
+            <h3 class="font-extrabold text-sm text-slate-900">Konfirmasi Libur</h3>
+            <p class="text-[10px] text-slate-400 font-medium">Pengambilan jadwal libur rutin</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeModalLiburDirect()" class="text-slate-400 hover:text-slate-700 text-sm p-1">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form onsubmit="submitLiburDirectAction(event)" class="space-y-3.5">
+        <div class="p-3.5 bg-sky-50 border border-sky-100 rounded-2xl flex items-center justify-between text-xs">
+          <span class="font-bold text-sky-900">Sisa Jatah Libur:</span>
+          <span id="liburSisaKuotaText" class="font-black text-sky-700 text-sm">4 Hari</span>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Catatan Tambahan (Opsional)</label>
+          <textarea id="liburKeteranganInput" rows="2" placeholder="Catatan libur (opsional)..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all"></textarea>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+          <button type="button" onclick="closeModalLiburDirect()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-all">Batal</button>
+          <button type="submit" id="btnSubmitLiburDirect" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-sky-600 hover:bg-sky-700 text-white shadow-md shadow-sky-500/25 transition-all flex items-center gap-1.5">
+            <span>Konfirmasi Libur</span>
+            <i class="fa-solid fa-check text-[11px]"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 14: NOTIFIKASI CUTI TERKUNCI -->
+  <div id="modalCutiLocked" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white max-w-sm w-full rounded-3xl p-6 shadow-2xl border border-slate-100 text-center space-y-4">
+      <div class="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto shadow-inner text-2xl">
+        <i class="fa-solid fa-lock"></i>
+      </div>
+      <div>
+        <h3 class="font-extrabold text-base text-slate-900">Akses Cuti Terkunci</h3>
+        <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+          🚧 Akses cuti untuk divisi kamu masih terkunci. Semoga Suryatokoku terus bertumbuh, semua tim makin sejahtera, dan fitur ini segera berubah dari angan-angan menjadi kenyataan. Semangat 🦾!
+        </p>
+      </div>
+      <div class="pt-2">
+        <button type="button" onclick="closeModalCutiLocked()" class="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 shadow-md shadow-brand-500/25 transition-all cursor-pointer">
+          Siap, Tetap Semangat! 🙌
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST NOTIFICATION CONTAINER -->
   <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
@@ -1293,6 +1452,10 @@
     let isSidebarAutoCollapsed = false;
     let cachedTeamDailyData = [];
     let activeTeamFilter = 'masuk';
+
+    let currentIzinType = 'SAKIT';
+    let izinPhotoBase64 = null;
+    let lemburPhotoBase64 = null;
 
     function showToast(message, type = 'info') {
       const c = document.getElementById('toastContainer');
@@ -1653,23 +1816,11 @@
       if (sLibur) sLibur.textContent = (currentUser.sisa_libur ?? 4) + ' Hari';
       if (sCuti) sCuti.textContent = (currentUser.sisa_cuti ?? 12) + ' Hari';
 
+      updateLiburOrIzinButtonUI();
+
       const btnCuti = document.getElementById('btnMenuCutiKaryawan');
       if (btnCuti) {
-        if (currentUser.divisi) {
-          const { data: div } = await supabaseClient
-            .from('divisi_presensi')
-            .select('allow_cuti')
-            .eq('nama_divisi', currentUser.divisi)
-            .single();
-          
-          if (div && div.allow_cuti === false) {
-            btnCuti.classList.add('hidden');
-          } else {
-            btnCuti.classList.remove('hidden');
-          }
-        } else {
-          btnCuti.classList.remove('hidden');
-        }
+        btnCuti.classList.remove('hidden');
       }
 
       loadUserTodayHistory();
@@ -1698,26 +1849,78 @@
         return;
       }
 
-      container.innerHTML = data.map(item => `
-        <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs">
-          <div class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full ${item.tipe === 'masuk' ? 'bg-emerald-500' : 'bg-rose-500'}"></span>
-            <div>
-              <div class="font-bold text-slate-800 capitalize">${item.tipe} - ${item.status}</div>
-              <div class="text-[10px] text-slate-400">${item.shift_nama || ''} ${item.lokasi_nama ? '• ' + item.lokasi_nama : ''}</div>
+      container.innerHTML = data.map(item => {
+        const itemStatus = (item.status || '').toUpperCase();
+        const isLibur = itemStatus === 'LIBUR';
+        const isIzin = itemStatus === 'IZIN';
+
+        if (isLibur || isIzin) {
+          const badgeText = isLibur ? 'LIBUR' : 'IZIN';
+          const dotColor = isLibur ? 'bg-sky-500' : 'bg-amber-500';
+          return `
+            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full ${dotColor}"></span>
+                <div>
+                  <div class="font-extrabold text-slate-800">${badgeText}</div>
+                </div>
+              </div>
+              <div class="text-[11px] font-mono font-bold text-slate-600">
+                ${new Date(item.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+              </div>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full ${item.tipe === 'masuk' ? 'bg-emerald-500' : 'bg-rose-500'}"></span>
+              <div>
+                <div class="font-bold text-slate-800 capitalize">${item.tipe} - ${item.status}</div>
+                <div class="text-[10px] text-slate-400">${item.shift_nama || ''} ${item.lokasi_nama ? '• ' + item.lokasi_nama : ''}</div>
+              </div>
+            </div>
+            <div class="text-[11px] font-mono font-bold text-slate-600">
+              ${new Date(item.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
             </div>
           </div>
-          <div class="text-[11px] font-mono font-bold text-slate-600">
-            ${new Date(item.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     function updateAttendanceButtonsState(records) {
       const btnMasuk = document.getElementById('btnAbsenMasuk');
       const btnKeluar = document.getElementById('btnAbsenKeluar');
       if (!btnMasuk || !btnKeluar) return;
+
+      const isLibur = records.some(r => (r.status || '').toUpperCase() === 'LIBUR');
+      const isIzin = records.some(r => (r.status || '').toUpperCase() === 'IZIN');
+
+      if (isLibur || isIzin) {
+        const offLabel = isLibur ? 'Libur' : 'Izin';
+        // Jika libur atau izin: tombol masuk dan keluar berubah jadi abu-abu (disabled), teks tetap Absen Masuk & Absen Keluar
+        btnMasuk.disabled = true;
+        btnMasuk.className = "p-4 bg-slate-200 text-slate-400 rounded-3xl border border-slate-300 flex flex-col items-center justify-center gap-2 cursor-not-allowed pointer-events-none opacity-70 select-none";
+        btnMasuk.innerHTML = `
+          <div class="w-12 h-12 rounded-2xl bg-slate-300 text-slate-500 flex items-center justify-center text-xl">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i>
+          </div>
+          <span class="font-extrabold text-sm text-slate-500">Absen Masuk</span>
+          <span class="text-[11px] text-slate-400 font-medium">${offLabel}</span>
+        `;
+
+        btnKeluar.disabled = true;
+        btnKeluar.className = "p-4 bg-slate-200 text-slate-400 rounded-3xl border border-slate-300 flex flex-col items-center justify-center gap-2 cursor-not-allowed pointer-events-none opacity-70 select-none";
+        btnKeluar.innerHTML = `
+          <div class="w-12 h-12 rounded-2xl bg-slate-300 text-slate-500 flex items-center justify-center text-xl">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          </div>
+          <span class="font-extrabold text-sm text-slate-500">Absen Keluar</span>
+          <span class="text-[11px] text-slate-400 font-medium">${offLabel}</span>
+        `;
+        return;
+      }
 
       const masukRecord = records.find(r => r.tipe === 'masuk');
       const keluarRecord = records.find(r => r.tipe === 'keluar');
@@ -1963,16 +2166,303 @@
       }
     }
 
+    function updateLiburOrIzinButtonUI() {
+      const btnText = document.getElementById('btnMenuLiburText');
+      const iconContainer = document.getElementById('btnMenuLiburIconContainer');
+      const icon = document.getElementById('btnMenuLiburIcon');
+      if (!btnText || !iconContainer || !icon) return;
+
+      const sisaLibur = currentUser ? (currentUser.sisa_libur ?? 0) : 0;
+      if (sisaLibur <= 0) {
+        btnText.textContent = 'Izin';
+        iconContainer.className = 'w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-sm';
+        icon.className = 'fa-solid fa-envelope-open-text';
+      } else {
+        btnText.textContent = 'Libur';
+        iconContainer.className = 'w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center text-sm';
+        icon.className = 'fa-solid fa-umbrella-beach';
+      }
+    }
+
+    function handleMenuLiburClick() {
+      if (!currentUser) return;
+      const sisaLibur = currentUser.sisa_libur ?? 0;
+      if (sisaLibur <= 0) {
+        openModalIzinUpload('IZIN');
+      } else {
+        openModalLiburDirect();
+      }
+    }
+
+    async function handleMenuCutiClick() {
+      if (!currentUser) return;
+      if (currentUser.divisi) {
+        try {
+          const { data: div } = await supabaseClient
+            .from('divisi_presensi')
+            .select('allow_cuti')
+            .eq('nama_divisi', currentUser.divisi)
+            .single();
+
+          if (div && div.allow_cuti === false) {
+            openModalCutiLocked();
+            return;
+          }
+        } catch (err) {
+          console.warn('Gagal cek status cuti divisi:', err);
+        }
+      }
+      openModalIzinUpload('CUTI');
+    }
+
+    function openModalCutiLocked() {
+      const modal = document.getElementById('modalCutiLocked');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+    }
+
+    function closeModalCutiLocked() {
+      const modal = document.getElementById('modalCutiLocked');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function openModalIzinUpload(type) {
+      if (!currentUser) return;
+      currentIzinType = type;
+      izinPhotoBase64 = null;
+
+      const titleEl = document.getElementById('modalIzinTitle');
+      const subtitleEl = document.getElementById('modalIzinSubtitle');
+      const iconBadge = document.getElementById('modalIzinIconBadge');
+      const fileInput = document.getElementById('izinFotoInput');
+      const ketInput = document.getElementById('izinKeteranganInput');
+      const previewBox = document.getElementById('izinPreviewContainer');
+      const uploadBox = document.getElementById('izinUploadBox');
+      const previewImg = document.getElementById('izinPreviewImg');
+
+      if (fileInput) fileInput.value = '';
+      if (previewImg) previewImg.src = '';
+      if (ketInput) ketInput.value = '';
+      if (previewBox) previewBox.classList.add('hidden');
+      if (uploadBox) uploadBox.classList.remove('hidden');
+
+      if (type === 'SAKIT') {
+        if (titleEl) titleEl.textContent = 'Pengajuan Sakit';
+        if (subtitleEl) subtitleEl.textContent = 'Unggah foto bukti resep / surat dokter';
+        if (iconBadge) {
+          iconBadge.className = 'w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-sm';
+          iconBadge.innerHTML = '<i class="fa-solid fa-briefcase-medical"></i>';
+        }
+      } else if (type === 'IZIN') {
+        if (titleEl) titleEl.textContent = 'Pengajuan Izin';
+        if (subtitleEl) subtitleEl.textContent = 'Unggah foto surat izin / bukti pendukung';
+        if (iconBadge) {
+          iconBadge.className = 'w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-sm';
+          iconBadge.innerHTML = '<i class="fa-solid fa-envelope-open-text"></i>';
+        }
+      } else {
+        if (titleEl) titleEl.textContent = 'Pengajuan Cuti';
+        if (subtitleEl) subtitleEl.textContent = 'Unggah foto bukti surat permohonan cuti';
+        if (iconBadge) {
+          iconBadge.className = 'w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-sm';
+          iconBadge.innerHTML = '<i class="fa-solid fa-calendar-check"></i>';
+        }
+      }
+
+      const modal = document.getElementById('modalIzinUpload');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+    }
+
+    function closeModalIzinUpload() {
+      izinPhotoBase64 = null;
+      const modal = document.getElementById('modalIzinUpload');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function handleIzinFotoChange(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        izinPhotoBase64 = evt.target.result;
+        const previewImg = document.getElementById('izinPreviewImg');
+        const previewBox = document.getElementById('izinPreviewContainer');
+        const uploadBox = document.getElementById('izinUploadBox');
+
+        if (previewImg) previewImg.src = izinPhotoBase64;
+        if (previewBox) previewBox.classList.remove('hidden');
+        if (uploadBox) uploadBox.classList.add('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function resetIzinFotoPreview(e) {
+      if (e) e.stopPropagation();
+      izinPhotoBase64 = null;
+      const fileInput = document.getElementById('izinFotoInput');
+      const previewBox = document.getElementById('izinPreviewContainer');
+      const uploadBox = document.getElementById('izinUploadBox');
+      const previewImg = document.getElementById('izinPreviewImg');
+
+      if (fileInput) fileInput.value = '';
+      if (previewImg) previewImg.src = '';
+      if (previewBox) previewBox.classList.add('hidden');
+      if (uploadBox) uploadBox.classList.remove('hidden');
+    }
+
+    async function submitIzinUploadAction(e) {
+      e.preventDefault();
+      if (!currentUser) return;
+
+      const ket = document.getElementById('izinKeteranganInput').value.trim();
+      const btn = document.getElementById('btnSubmitIzinUpload');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Mengirim...';
+      }
+
+      try {
+        let driveUrl = null;
+        if (izinPhotoBase64) {
+          const fileName = `${currentIzinType}_${currentUser.username}_${Date.now()}.jpg`;
+          driveUrl = await uploadPhotoToGoogleDrive(izinPhotoBase64, fileName);
+        }
+
+        const today = getLocalISODate();
+        const { error } = await supabaseClient.from('presensi_presensi').insert([{
+          karyawan_id: currentUser.id,
+          karyawan_nama: currentUser.nama_lengkap,
+          divisi: currentUser.divisi,
+          tipe: 'keluar',
+          status: currentIzinType,
+          shift_nama: (currentUser.shifts && currentUser.shifts[0]) || 'Reguler',
+          foto_url: driveUrl,
+          keterangan: ket,
+          tanggal: today
+        }]);
+
+        if (error) throw error;
+
+        // Potong kuota cuti jika statusnya CUTI
+        if (currentIzinType === 'CUTI') {
+          const curCuti = currentUser.sisa_cuti ?? 12;
+          const newCuti = Math.max(0, curCuti - 1);
+          await supabaseClient.from('karyawan_presensi').update({ sisa_cuti: newCuti }).eq('id', currentUser.id);
+          currentUser.sisa_cuti = newCuti;
+        }
+
+        const typeLabel = currentIzinType === 'SAKIT' ? 'Sakit' : (currentIzinType === 'IZIN' ? 'Izin' : 'Cuti');
+        showToast(`Pengajuan ${typeLabel} berhasil disimpan!`, 'success');
+        closeModalIzinUpload();
+        refreshUserDashboardUI();
+      } catch (err) {
+        console.error(err);
+        showToast(`Gagal menyimpan pengajuan ${currentIzinType}.`, 'error');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>Kirim Pengajuan</span><i class="fa-solid fa-paper-plane text-[11px] ml-1"></i>';
+        }
+      }
+    }
+
+    function openModalLiburDirect() {
+      if (!currentUser) return;
+      if ((currentUser.sisa_libur ?? 0) <= 0) {
+        showToast('Jatah libur Anda telah habis. Silakan ajukan Izin.', 'info');
+        openModalIzinUpload('IZIN');
+        return;
+      }
+      const kuotaEl = document.getElementById('liburSisaKuotaText');
+      const ketInput = document.getElementById('liburKeteranganInput');
+
+      if (kuotaEl) kuotaEl.textContent = `${currentUser.sisa_libur ?? 4} Hari`;
+      if (ketInput) ketInput.value = '';
+
+      const modal = document.getElementById('modalLiburDirect');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+    }
+
+    function closeModalLiburDirect() {
+      const modal = document.getElementById('modalLiburDirect');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    async function submitLiburDirectAction(e) {
+      e.preventDefault();
+      if (!currentUser) return;
+
+      const ket = document.getElementById('liburKeteranganInput').value.trim() || 'Jadwal Libur';
+      const btn = document.getElementById('btnSubmitLiburDirect');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Menyimpan...';
+      }
+
+      try {
+        const today = getLocalISODate();
+        const { error } = await supabaseClient.from('presensi_presensi').insert([{
+          karyawan_id: currentUser.id,
+          karyawan_nama: currentUser.nama_lengkap,
+          divisi: currentUser.divisi,
+          tipe: 'keluar',
+          status: 'LIBUR',
+          shift_nama: (currentUser.shifts && currentUser.shifts[0]) || 'Reguler',
+          keterangan: ket,
+          tanggal: today
+        }]);
+
+        if (error) throw error;
+
+        // Potong kuota libur
+        const curLibur = currentUser.sisa_libur ?? 4;
+        const newLibur = Math.max(0, curLibur - 1);
+        await supabaseClient.from('karyawan_presensi').update({ sisa_libur: newLibur }).eq('id', currentUser.id);
+        currentUser.sisa_libur = newLibur;
+
+        showToast('Presensi Libur berhasil dicatat!', 'success');
+        closeModalLiburDirect();
+        refreshUserDashboardUI();
+      } catch (err) {
+        console.error(err);
+        showToast('Gagal mencatat presensi libur.', 'error');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>Konfirmasi Libur</span><i class="fa-solid fa-check text-[11px] ml-1"></i>';
+        }
+      }
+    }
+
     function openModalPresensiDirect(statusTipe) {
       if (!currentUser) return;
-      openModalPresensi('keluar');
-      setTimeout(() => {
-        const sel = document.getElementById('presensiStatusKeluarSelect');
-        if (sel) {
-          sel.value = statusTipe;
-          onStatusKeluarChange();
-        }
-      }, 250);
+      if (statusTipe === 'SAKIT') {
+        openModalIzinUpload(statusTipe);
+      } else if (statusTipe === 'CUTI') {
+        handleMenuCutiClick();
+      } else if (statusTipe === 'LIBUR') {
+        openModalLiburDirect();
+      } else {
+        openModalPresensi('keluar');
+      }
     }
 
     function onStatusKeluarChange() {
@@ -2414,6 +2904,22 @@
 
     function openModalLemburForm() {
       if (!currentUser) return;
+      lemburPhotoBase64 = null;
+
+      const durasiInput = document.getElementById('lemburDurasi');
+      const ketInput = document.getElementById('lemburKeterangan');
+      const fileInput = document.getElementById('lemburFotoInput');
+      const previewBox = document.getElementById('lemburPreviewContainer');
+      const uploadBox = document.getElementById('lemburUploadBox');
+      const previewImg = document.getElementById('lemburPreviewImg');
+
+      if (durasiInput) durasiInput.value = '';
+      if (ketInput) ketInput.value = '';
+      if (fileInput) fileInput.value = '';
+      if (previewImg) previewImg.src = '';
+      if (previewBox) previewBox.classList.add('hidden');
+      if (uploadBox) uploadBox.classList.remove('hidden');
+
       const m = document.getElementById('modalLembur');
       if (m) {
         m.classList.remove('hidden');
@@ -2422,6 +2928,7 @@
     }
 
     function closeModalLembur() {
+      lemburPhotoBase64 = null;
       const m = document.getElementById('modalLembur');
       if (m) {
         m.classList.add('hidden');
@@ -2429,30 +2936,59 @@
       }
     }
 
+    function handleLemburFotoChange(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        lemburPhotoBase64 = evt.target.result;
+        const previewImg = document.getElementById('lemburPreviewImg');
+        const previewBox = document.getElementById('lemburPreviewContainer');
+        const uploadBox = document.getElementById('lemburUploadBox');
+
+        if (previewImg) previewImg.src = lemburPhotoBase64;
+        if (previewBox) previewBox.classList.remove('hidden');
+        if (uploadBox) uploadBox.classList.add('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function resetLemburFotoPreview(e) {
+      if (e) e.stopPropagation();
+      lemburPhotoBase64 = null;
+      const fileInput = document.getElementById('lemburFotoInput');
+      const previewBox = document.getElementById('lemburPreviewContainer');
+      const uploadBox = document.getElementById('lemburUploadBox');
+      const previewImg = document.getElementById('lemburPreviewImg');
+
+      if (fileInput) fileInput.value = '';
+      if (previewImg) previewImg.src = '';
+      if (previewBox) previewBox.classList.add('hidden');
+      if (uploadBox) uploadBox.classList.remove('hidden');
+    }
+
     async function submitLemburAction(e) {
       e.preventDefault();
-      const durasi = parseInt(document.getElementById('lemburDurasi').value) || 1;
+      const durasiStr = document.getElementById('lemburDurasi').value;
+      const durasi = parseInt(durasiStr);
+      if (!durasi || durasi < 1) {
+        showToast('Silakan masukkan durasi lembur (minimal 1 jam).', 'error');
+        return;
+      }
+
       const ket = document.getElementById('lemburKeterangan').value.trim();
-      const fileInput = document.getElementById('lemburFotoInput');
       const btn = document.getElementById('btnSubmitLembur');
 
       if (btn) {
         btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...';
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Mengirim...';
       }
 
       try {
         let buktiUrl = null;
-        if (fileInput && fileInput.files.length > 0) {
-          const file = fileInput.files[0];
-          const reader = new FileReader();
-          buktiUrl = await new Promise((resolve) => {
-            reader.onload = async () => {
-              const res = await uploadPhotoToGoogleDrive(reader.result, `Lembur_${currentUser.username}_${Date.now()}.jpg`);
-              resolve(res);
-            };
-            reader.readAsDataURL(file);
-          });
+        if (lemburPhotoBase64) {
+          buktiUrl = await uploadPhotoToGoogleDrive(lemburPhotoBase64, `Lembur_${currentUser.username}_${Date.now()}.jpg`);
         }
 
         const { error } = await supabaseClient.from('lembur_presensi').insert([{
@@ -2475,7 +3011,7 @@
       } finally {
         if (btn) {
           btn.disabled = false;
-          btn.innerHTML = 'Kirim Pengajuan Lembur';
+          btn.innerHTML = '<span>Kirim Pengajuan</span><i class="fa-solid fa-paper-plane text-[11px] ml-1"></i>';
         }
       }
     }
@@ -3838,7 +4374,7 @@
       });
     }
     // --- AKHIR BARIS BARU ---
-
+    
   </script>
 </body>
 </html>
