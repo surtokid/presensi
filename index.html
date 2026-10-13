@@ -74,20 +74,30 @@
   </style>
 
 <!-- OneSignal Web Push SDK -->
-  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-  <script>
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(async function(OneSignal) {
-      await OneSignal.init({
-        appId: "03a41ed9-e775-424c-977e-17351ec5e4f7",
-        safari_web_id: "web.onesignal.auto.5460a967-902f-480f-be25-7a4d963d753c",
-        serviceWorkerPath: "sw.js"
-      });
-
-      // Minta izin notifikasi secara otomatis kepada pengguna
-      OneSignal.Notifications.requestPermission();
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "03a41ed9-e775-424c-977e-17351ec5e4f7",
+      safari_web_id: "web.onesignal.auto.5460a967-902f-480f-be25-7a4d963d753c",
+      serviceWorkerPath: "presensi/sw.js",
+      serviceWorkerParam: { scope: "/presensi/" }
     });
-  </script>
+  });
+
+  // Fungsi yang dipanggil saat user menekan tombol lonceng di layar
+  async function mintaIzinNotifikasi() {
+    try {
+      if (window.OneSignal) {
+        await OneSignal.Notifications.requestPermission();
+        showToast("Memeriksa izin notifikasi...", "info");
+      }
+    } catch (err) {
+      console.warn("Gagal meminta izin:", err);
+    }
+  }
+</script>
   
 </head>
 <body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex flex-col">
@@ -176,6 +186,9 @@
               <button id="pwaInstallIconBtn" type="button" onclick="triggerAddToHomeScreen()" class="w-9 h-9 rounded-xl bg-white/15 hover:bg-white/25 active:scale-95 flex items-center justify-center text-white transition-all text-xs" title="Pasang ke Layar Utama (Fullscreen)">
                 <i class="fa-solid fa-mobile-screen-button"></i>
               </button>
+              <button id="btnAktifkanNotif" type="button" onclick="mintaIzinNotifikasi()" class="w-9 h-9 rounded-xl bg-white/15 hover:bg-white/25 active:scale-95 flex items-center justify-center text-white transition-all text-xs" title="Aktifkan Notifikasi">
+  <i class="fa-solid fa-bell"></i>
+</button>
               <button onclick="logoutKaryawan()" class="w-9 h-9 rounded-xl bg-white/15 hover:bg-white/25 active:scale-95 flex items-center justify-center text-white transition-all text-xs" title="Keluar">
                 <i class="fa-solid fa-arrow-right-from-bracket"></i>
               </button>
