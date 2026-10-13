@@ -4113,7 +4113,26 @@ kirimPushNotification(
       `).join('') || '<div class="text-xs text-slate-400 text-center py-4">Belum ada siaran pengumuman.</div>';
     }
 
-async function handlePublishPengumum
+async function handlePublishPengumuman(e) {
+      e.preventDefault();
+      const judul = document.getElementById('pengumumanJudul').value.trim();
+      const isi = document.getElementById('pengumumanIsi').value.trim();
+
+      // 1. Simpan ke database Supabase
+      await supabaseClient.from('pengumuman_presensi').insert([{ 
+        judul, 
+        isi, 
+        author: currentAdmin?.nama_lengkap || 'Admin' 
+      }]);
+
+      // 2. Kirim push notification ke semua perangkat lewat GAS
+      kirimPushNotification(`Pengumuman: ${judul}`, isi);
+
+      showToast('Pengumuman berhasil disiarkan ke seluruh karyawan!', 'success');
+      document.getElementById('pengumumanJudul').value = '';
+      document.getElementById('pengumumanIsi').value = '';
+      loadAdminPengumuman();
+    }
 
     async function loadAdminUserList() {
       const { data } = await supabaseClient.from('admin_presensi').select('*').order('created_at');
@@ -4373,16 +4392,6 @@ async function handlePublishPengumum
     function handlePhotoModalBackdropClick(e) {
       if (e.target && e.target.id === 'modalPhotoPreview') {
         closePhotoPreviewModal();
-      }
-    }
-
-    function closePhotoPreviewModal() {
-      const modal = document.getElementById('modalPhotoPreview');
-      const img = document.getElementById('photoPreviewImg');
-      if (img) img.src = '';
-      if (modal) {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
       }
     }
 
