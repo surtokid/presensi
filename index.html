@@ -73,19 +73,21 @@
     }
   </style>
 
-  <!-- OneSignal Web Push SDK -->
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "03a41ed9-e775-424c-977e-17351ec5e4f7",
-      safari_web_id: "web.onesignal.auto.5460a967-902f-480f-be25-7a4d963d753c",
-      serviceWorkerParam: { scope: "/presensi/" },
-      serviceWorkerPath: "sw.js"
+<!-- OneSignal Web Push SDK -->
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <script>
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+      await OneSignal.init({
+        appId: "03a41ed9-e775-424c-977e-17351ec5e4f7",
+        safari_web_id: "web.onesignal.auto.5460a967-902f-480f-be25-7a4d963d753c",
+        serviceWorkerPath: "sw.js"
+      });
+
+      // Minta izin notifikasi secara otomatis kepada pengguna
+      OneSignal.Notifications.requestPermission();
     });
-  });
-</script>
+  </script>
   
 </head>
 <body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex flex-col">
@@ -4111,25 +4113,7 @@ kirimPushNotification(
       `).join('') || '<div class="text-xs text-slate-400 text-center py-4">Belum ada siaran pengumuman.</div>';
     }
 
-    async function handlePublishPengumuman(e) {
-      e.preventDefault();
-      const judul = document.getElementById('pengumumanJudul').value.trim();
-      const isi = document.getElementById('pengumumanIsi').value.trim();
-
-      await supabaseClient.from('pengumuman_presensi').insert([{ judul, isi, author: currentAdmin?.nama_lengkap || 'Admin' }]);
-      showToast('Pengumuman berhasil disiarkan ke seluruh karyawan!', 'success');
-      document.getElementById('pengumumanJudul').value = '';
-      document.getElementById('pengumumanIsi').value = '';
-      loadAdminPengumuman();
-
-      await supabaseClient.from('pengumuman_presensi').insert([{ judul, isi, author: currentAdmin?.nama_lengkap || 'Admin' }]);
-
-// Kirim push notification ke semua perangkat
-kirimPushNotification(`Pengumuman: ${judul}`, isi);
-
-showToast('Pengumuman berhasil disiarkan ke seluruh karyawan!', 'success');
-      
-    }
+async function handlePublishPengumum
 
     async function loadAdminUserList() {
       const { data } = await supabaseClient.from('admin_presensi').select('*').order('created_at');
